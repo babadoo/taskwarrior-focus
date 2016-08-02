@@ -1,0 +1,174 @@
+#!/usr/bin/env python3
+# encoding: utf-8
+
+import sys
+import argparse
+import subprocess
+from tasklib import *
+
+tw = TaskWarrior(data_location='~/.task', create=True)
+
+
+def init(args):
+    tasks = tw.tasks.all()
+    for t in tasks:
+        t['focus'] = 0
+        t.save()
+
+
+def setfocus(args):
+    task = tw.tasks.get(id=args.taskid)
+    task['focus'] = args.value
+    task.save()
+
+
+def listfocus(args):
+    fields = 'id', 'description', 'focus'
+    tasks = tw.tasks.filter(status='pending')
+    tasks = sorted(tasks, key=lambda t: t['focus'], reverse=True)
+    for t in tasks:
+        values = [str(t[item]) for item in fields]
+        print('%s %s (%s)' % tuple(values))
+
+
+def top(args):
+    max = 0
+    init = False
+    task = tw.tasks.get(id=args.taskid)
+    for t in tw.tasks.all():
+        if t['id'] > 0 and t['id'] != task['id']:
+            if not init:
+                init = True
+                toptask = t
+                max = t['focus']
+            if t['focus'] > max:
+                max = t['focus']
+                toptask = t
+    task['focus'] = toptask['focus'] + 1
+    task.save()
+
+
+def bottom(args):
+    task = tw.tasks.get(id=args.taskid)
+    task['focus'] = 0
+    task.save()
+
+
+def up(args):
+    task = tw.tasks.get(id=args.taskid)
+    upper = list()
+    candidate = None
+    for t in tw.tasks.filter(status='pending'):
+        if t['focus'] > task['focus']:
+            if candidate is None:
+                candidate = t
+            else:
+                if t['focus'] < candidate['focus']:
+                    candidate = t
+    if candidate is None:
+        if task['focus'] == 0:
+            task['focus'] = 1
+    else:
+        focus = candidate['focus']
+        candidate['focus'] = task['focus']
+        task['focus'] = focus
+        candidate.save()
+    task.save()
+
+
+def down(args):
+    task = tw.tasks.get(id=args.taskid)
+    candidate = None
+    for t in tw.tasks.filter(status='pending'):
+        if t['focus'] < task['focus']:
+            if candidate is None:
+                candidate = t
+            else:
+                if t['focus'] > candidate['focus']:
+                    candidate = t
+    if candidate is not None:
+        focus = candidate['focus']
+        candidate['focus'] = task['focus']
+        task['focus'] = focus
+        candidate.save()
+    task.save()
+
+
+def before(args):
+    candidate = tw.tasks.get(id=args.target)
+    task = tw.tasks.get(id=args.taskid)
+    tasks = [t for t in tw.tasks.filter(status='pending')]
+    for t in tasks:
+        focus = t['focus']
+        if focus > candidate['focus']:
+            t['focus'] += 1
+        if focus >= task['focus']:
+            t['focus'] -= 1
+        t.save()
+    focus = candidate['focus']
+    task['focus'] = focus
+    task.save()
+
+
+def after(args):
+    candidate = tw.tasks.get(id=args.target)
+    task = tw.tasks.get(id=args.taskid)
+    tasks = [t for t in tw.tasks.filter(status='pending')]
+    for t in tasks:
+        focus = t['focus']
+        if focus >= candidate['focus']:
+            t['focus'] += 1
+        if focus >= task['focus']:
+            t['focus'] -= 1
+        t.save()
+    focus = candidate['focus']
+    task['focus'] = focus
+    task.save()
+
+
+def reorder(args):
+    tasks = tw.tasks.filter(status='pending')
+    tasks = sorted(tasks, key=lambda t: t['focus'])
+    focus = 0
+    for task in tasks:
+        task['focus'] = focus
+        focus += 1
+        task.save()
+
+parser = argparse.ArgumentParser(
+    description='tw - taskwarrior command line utility')
+subparsers = parser.add_subparsers(dest='command',
+                                   title='subcommands',
+                                   description='valid subcommands',
+                                   help='sub-command help')
+parser_setfocus = subparsers.add_parser('setfocus', help='setfocus')
+parser_setfocus.add_argument('taskid', default=None, help='task id')
+parser_setfocus.add_argument('value', help='focus value')
+parser_top = subparsers.add_parser('top', help='top')
+parser_top.add_argument('taskid', default=None, help='task id')
+parser_bottom = subparsers.add_parser('bottom', help='bottom')
+parser_bottom.add_argument('taskid', default=None, help='task id')
+parser_before = subparsers.add_parser('before', help='before')
+parser_before.add_argument('taskid', default=None, help='task id')
+parser_before.add_argument('target', default=None, help='target id')
+parser_after = subparsers.add_parser('after', help='after')
+parser_after.add_argument('taskid', default=None, help='task id')
+parser_after.add_argument('target', default=None, help='target id')
+parser_up = subparsers.add_parser('up', help='up')
+parser_up.add_argument('taskid', default=None, help='task id')
+parser_down = subparsers.add_parser('down', help='down')
+parser_down.add_argument('taskid', default=None, help='task id')
+parser_listfocus = subparsers.add_parser('listfocus', help='listfocus')
+parser_init = subparsers.add_parser('init', help='init')
+parser_reorder = subparsers.add_parser('reorder', help='reorder')
+
+subprocess.call(["clear"])
+
+if len(sys.argv) > 1:
+    if sys.argv[1] in locals():
+        args = parser.parse_args()
+        locals()[args.command](args)
+    else:
+        subprocess.call(["task"] + sys.argv[1:])
+else:
+    subprocess.call(["task"])
