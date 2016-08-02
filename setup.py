@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='taskwarrior-focus',
-    version='0.1',
+    version='0.1.1',
     description='Taskwarrior wrapper for manual ordering of a focus list',
     url='http://github.com/babadoo/tw',
     author='babadoo',
