@@ -28,15 +28,18 @@ The current alpha version of taskwarrior-focus is 0.1, released 2016-08-02.
 Installation
 ============
 
-pip install taskwarrior-focus
-task config uda.focus.type numeric
-task config uda.focus.label Focus
-task config uda.focus.default 0
-task config report.focus.description 'List of tasks to focus on'
-task config report.focus.columns 'id,priority,project,description,urgency,focus'
-task config report.focus.filter 'status:pending and focus.not:0'
-task config report.focus.sort 'focus+'
-tw init
+::
+
+    pip install taskwarrior-focus
+    task config uda.focus.type numeric
+    task config uda.focus.label Focus
+    task config uda.focus.default 0
+    task config report.focus.description 'List of tasks to focus on'
+    task config report.focus.columns 'id,priority,project,description,urgency,focus'
+    task config report.focus.filter 'status:pending and focus.not:0'
+    task config report.focus.sort 'focus+'
+    tw init
+
 
 Usage
 =====
