@@ -69,6 +69,16 @@ Set task 3 on top of focus list::
     tw top 3
 
 
+Show focus list::
+
+    tw focus
+
+
+Or the short version::
+
+    tw fo
+
+
 Set task 7 on bottom of focus list::
 
     tw bottom 7
