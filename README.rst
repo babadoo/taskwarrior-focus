@@ -30,7 +30,6 @@ Installation
 
 pip install taskwarrior-focus
 task config uda.focus.type numeric
-task config uda.focus.default=0
 task config uda.focus.label Focus
 task config uda.focus.default 0
 task config report.focus.description 'List of tasks to focus on'

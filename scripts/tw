@@ -50,7 +50,13 @@ def top(args):
 
 def bottom(args):
     task = tw.tasks.get(id=args.taskid)
-    task['focus'] = 0
+    tasks = [t for t in tw.tasks.filter(status='pending')]
+    tasks = [t for t in tasks if t['focus'] > 0]
+    if len(tasks) > 0:
+        for t in tasks:
+            t['focus'] += 1
+            t.save()
+    task['focus'] = 1
     task.save()
 
 

@@ -8,7 +8,7 @@ setup(
     author='babadoo',
     author_email='babadoo@doonx.org',
     keywords = ["taskwarrior", "task", "sort", "order", "focus", "manual"],
-    packages=['twfocus'],
+    packages=['taskwarrior-focus'],
     scripts=['scripts/tw'],
     classifiers = [
         "Programming Language :: Python",
