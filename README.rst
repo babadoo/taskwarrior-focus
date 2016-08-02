@@ -10,6 +10,15 @@ Taskwarrior wrapper for manual ordering of a focus list
 :Documentation: https://github.com/babadoo/taskwarrior-focus/README.rst
 :License: BSD License
 
+About
+=====
+
+| This wrapper around taskwarrior allows to add tasks to a 'focus list'.
+| The tasks can be sorted by the user, by moving up and down in a list,
+| putting tasks at the top or bottom of the list, or by inserting tasks
+| after or before a specified task.
+
+
 Features
 ========
 
