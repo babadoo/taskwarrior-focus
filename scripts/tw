@@ -150,16 +150,25 @@ def reorder(args):
 def tt(args):
     alltasks = tw.tasks.filter('+TODAY')
     tasklist = [{t['due'].hour: t} for t in alltasks]
+    hourlist = [t['due'].hour for t in alltasks]
     hourtasks = defaultdict(list)
     for d in tasklist:
        for key,val in d.items():
           hourtasks[key].append(val)
     table = list()
-    for hour in range(8, 24):
-        hour_formatted = '{:02d}:00'.format(hour)
+    # merge hours of tasklist with default range of 8 to 23
+    hours = sorted(set(hourlist + list(range(8, 24))))
+    for hour in hours:
+        hour_formatted = '{0:02d}:00'.format(hour)
+        descriptions = list()
         if hour in hourtasks:
-            descriptions = '\n'.join(['{} [{}]'.format(hourtask['description'], hourtask['id']) for hourtask in hourtasks[hour]])
-            table.append([hour_formatted, descriptions])
+            for hourtask in hourtasks[hour]:
+                descriptions.append('{:02d}:{:02d} {:.72} [{}]'.format(hour,
+                                                               hourtask['due'].minute,
+                                                               hourtask['description'],
+                                                               hourtask['id']))
+            cell = '\n'.join(descriptions)
+            table.append([hour_formatted, cell])
         else:
             table.append([hour_formatted, ''])
     print(tabulate(table, tablefmt="grid"))
