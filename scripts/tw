@@ -162,7 +162,8 @@ def tt(args):
         hour_formatted = '{0:02d}:00'.format(hour)
         descriptions = list()
         if hour in hourtasks:
-            for hourtask in hourtasks[hour]:
+            hourtasks_sorted = sorted(hourtasks[hour], key=lambda x: x['due'].minute)
+            for hourtask in hourtasks_sorted:
                 descriptions.append('{:02d}:{:02d} {:.72} [{}]'.format(hour,
                                                                hourtask['due'].minute,
                                                                hourtask['description'],
