@@ -4,7 +4,9 @@
 import sys
 import argparse
 import subprocess
+from collections import defaultdict
 from tasklib import *
+from tabulate import tabulate
 
 tw = TaskWarrior(data_location='~/.task', create=True)
 
@@ -59,6 +61,10 @@ def bottom(args):
     task['focus'] = 1
     task.save()
 
+def defocus(args):
+    task = tw.tasks.get(id=args.taskid)
+    task['focus'] = 0
+    task.save()
 
 def up(args):
     task = tw.tasks.get(id=args.taskid)
@@ -147,6 +153,33 @@ def note(args):
     task.save()
     subprocess.call("vim ~/notes/{}".format(task['uuid']), shell=True)
 
+def tt(args):
+    alltasks = tw.tasks.filter('+TODAY')
+    tasklist = [{t['due'].hour: t} for t in alltasks]
+    hourlist = [t['due'].hour for t in alltasks]
+    hourtasks = defaultdict(list)
+    for d in tasklist:
+       for key,val in d.items():
+          hourtasks[key].append(val)
+    table = list()
+    # merge hours of tasklist with default range of 8 to 23
+    hours = sorted(set(hourlist + list(range(8, 24))))
+    for hour in hours:
+        hour_formatted = '{0:02d}:00'.format(hour)
+        descriptions = list()
+        if hour in hourtasks:
+            hourtasks_sorted = sorted(hourtasks[hour], key=lambda x: x['due'].minute)
+            for hourtask in hourtasks_sorted:
+                descriptions.append('{:02d}:{:02d} {:.72} [{}]'.format(hour,
+                                                               hourtask['due'].minute,
+                                                               hourtask['description'],
+                                                               hourtask['id']))
+            cell = '\n'.join(descriptions)
+            table.append([hour_formatted, cell])
+        else:
+            table.append([hour_formatted, ''])
+    print(tabulate(table, tablefmt="grid"))
+
 
 parser = argparse.ArgumentParser(
     description='tw - taskwarrior command line utility')
@@ -163,6 +196,8 @@ parser_top = subparsers.add_parser('top', help='top')
 parser_top.add_argument('taskid', default=None, help='task id')
 parser_bottom = subparsers.add_parser('bottom', help='bottom')
 parser_bottom.add_argument('taskid', default=None, help='task id')
+parser_defocus = subparsers.add_parser('defocus', help='defocus')
+parser_defocus.add_argument('taskid', default=None, help='task id')
 parser_before = subparsers.add_parser('before', help='before')
 parser_before.add_argument('taskid', default=None, help='task id')
 parser_before.add_argument('target', default=None, help='target id')
@@ -176,6 +211,7 @@ parser_down.add_argument('taskid', default=None, help='task id')
 parser_listfocus = subparsers.add_parser('listfocus', help='listfocus')
 parser_init = subparsers.add_parser('init', help='init')
 parser_reorder = subparsers.add_parser('reorder', help='reorder')
+parser_tt = subparsers.add_parser('tt', help='timetable')
 
 subprocess.call(["clear"])
 

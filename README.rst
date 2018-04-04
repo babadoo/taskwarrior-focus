@@ -104,3 +104,8 @@ Move task 7 down in the focus list::
     tw down 7
 
 
+Display timetable report for today::
+
+    tw tt
+
+
