@@ -141,6 +141,13 @@ def reorder(args):
         focus += 1
         task.save()
 
+def note(args):
+    task = tw.tasks.get(id=args.taskid)
+    task['tags'].add('note')
+    task.save()
+    subprocess.call("vim ~/notes/{}".format(task['uuid']), shell=True)
+
+
 parser = argparse.ArgumentParser(
     description='tw - taskwarrior command line utility')
 subparsers = parser.add_subparsers(dest='command',
@@ -150,6 +157,8 @@ subparsers = parser.add_subparsers(dest='command',
 parser_setfocus = subparsers.add_parser('setfocus', help='setfocus')
 parser_setfocus.add_argument('taskid', default=None, help='task id')
 parser_setfocus.add_argument('value', help='focus value')
+parser_note = subparsers.add_parser('note', help='note')
+parser_note.add_argument('taskid', default=None, help='task id')
 parser_top = subparsers.add_parser('top', help='top')
 parser_top.add_argument('taskid', default=None, help='task id')
 parser_bottom = subparsers.add_parser('bottom', help='bottom')
